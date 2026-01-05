@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { AdminService } from '../../services/admin';
 
 @Component({
   selector: 'app-pending-officers',
@@ -9,33 +9,39 @@ import { HttpClient } from '@angular/common/http';
   templateUrl: './pending-officers.html',
   styleUrls: ['./pending-officers.css']
 })
-export class PendingOfficers {
-  officers:any[] = [];
+export class PendingOfficers implements OnInit {
 
-  constructor(private http: HttpClient) {}
+  officers: any[] = [];
 
-  ngOnInit(){
-    this.http.get<any[]>('https://localhost:7192/api/admin/pending-officers')
-      .subscribe(res=>{
-        this.officers = res;
-      });
-  }
+  constructor(private admin: AdminService) {}
 
-  approve(id:number){
-    this.http.put(`https://localhost:7192/api/admin/approve-officer/${id}`,{})
-      .subscribe(()=>this.ngOnInit());
-  }
-
-  reject(id:number){
-    this.http.delete(`https://localhost:7192/api/admin/reject-officer/${id}`)
-      .subscribe(()=>this.ngOnInit());
+  ngOnInit(): void {
+    this.load();
   }
 
   load() {
-    this.http.get<any[]>('https://localhost:7192/api/admin/pending-officers')
-      .subscribe({
-        next: res => this.officers = res,
-        error: err => console.error(err)
-      });
+    this.admin.getPendingOfficers().subscribe({
+      next: (res) => {
+        this.officers = res;
+      },
+      error: (err) => {
+        console.error(err);
+      }
+    });
+  }
+
+  approve(id: number) {
+    this.admin.approveOfficer(id).subscribe(() => {
+      alert("Officer Approved");
+      this.load();
+    });
+  }
+
+  reject(id: number) {
+    this.admin.rejectOfficer(id).subscribe(() => {
+      alert("Officer Rejected");
+      this.load();
+    });
   }
 }
+

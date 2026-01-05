@@ -57,20 +57,18 @@ export class Dashboard implements OnInit {
   }
 
   loadDashboard() {
-    this.http.get<ActiveVsClosed>('http://localhost:5209/api/admin/reports/active-vs-closed')
-      .subscribe(res => {
-        this.activeLoans = res.active;
-        this.closedLoans = res.closed;
-        this.cdr.detectChanges();
-      });
+    this.admin.getActiveVsClosed().subscribe(res => {
+      this.activeLoans = res.active;
+      this.closedLoans = res.closed;
+      this.cdr.detectChanges();
+    });
 
-    this.http.get<CustomerSummary[]>('http://localhost:5209/api/admin/reports/customer-summary')
-      .subscribe(res => {
-        this.customerSummary = res;
-        this.totalCustomers = res.length;
-        this.cdr.detectChanges();
-        setTimeout(() => this.drawCustomerChart(), 0);
-      });
+    this.admin.getCustomerSummary().subscribe(res => {
+      this.customerSummary = res;
+      this.totalCustomers = res.length;
+      this.cdr.detectChanges();
+      setTimeout(() => this.drawCustomerChart(), 0);
+    });
 
     this.admin.getLoanStatus().subscribe(res => {
       this.loanStatus = res;

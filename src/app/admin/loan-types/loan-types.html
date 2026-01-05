@@ -1,0 +1,69 @@
+<div class="page">
+  <h2>Hi, Admin 👋</h2>
+  <h3>Manage Loan Types</h3>
+  <p class="sub">Update available loans</p>
+
+  <div class="card">
+    <div class="card-head">
+      <h4>Loan Types</h4>
+      <span>{{loanTypes.length}} configured</span>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Loan Type</th>
+          <th>Interest</th>
+          <th>Min Amount</th>
+          <th>Max Amount</th>
+          <th>Max Tenure</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let l of loanTypes">
+          <td>{{l.loanTypeId}}</td>
+          <td>{{l.loanTypeName}}</td>
+          <td>{{l.interestRate}}%</td>
+          <td>₹ {{l.minAmount | number}}</td>
+          <td>₹ {{l.maxAmount | number}}</td>
+          <td>{{l.maxTenureMonths}} months</td>
+          <button class="edit-btn" (click)="openEdit(l)">Edit</button>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- EDIT MODAL -->
+<div class="modal-backdrop" *ngIf="editLoan">
+  <div class="modal-box">
+
+    <h2>Edit Loan Type</h2>
+
+    <label>Loan Name</label>
+    <input [(ngModel)]="editLoan.loanTypeName"/>
+
+    <label>Interest (%)</label>
+    <input type="number" [(ngModel)]="editLoan.interest"/>
+
+    <label>Min Amount</label>
+    <input type="number" [(ngModel)]="editLoan.minAmount"/>
+
+    <label>Max Amount</label>
+    <input type="number" [(ngModel)]="editLoan.maxAmount"/>
+
+    <label>Max Tenure (Months)</label>
+    <input type="number" [(ngModel)]="editLoan.maxTenureMonths"/>
+
+    <div class="modal-actions">
+      <button class="save" (click)="updateLoanType()">Save</button>
+<button class="cancel" (click)="editLoan=null">Cancel</button>
+
+    </div>
+
+  </div>
+</div>
+
+  </div>
+</div>

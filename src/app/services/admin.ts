@@ -16,10 +16,6 @@ export class AdminService {
     };
   }
 
-  getPending(){
-    return this.http.get<any[]>(`${this.api}/pending-officers`, this.authHeader());
-  }
-
   approve(id:any){
     return this.http.put(`${this.api}/approve-officer/${id}`,{}, this.authHeader());
   }
@@ -38,8 +34,34 @@ export class AdminService {
   getActiveVsClosed(){
     return this.http.get<any>(`${this.api}/reports/active-vs-closed`);
   }
-  getPendingOfficers(){
-  return this.http.get<any[]>('http://localhost:5209/api/admin/pending-officers');
+  getPendingOfficers() {
+    return this.http.get<any[]>(
+      `${this.api}/pending-officers`,
+      this.authHeader()
+    );
+  }
+
+  approveOfficer(id: number) {
+    return this.http.put(
+      `${this.api}/approve-officer/${id}`,
+      {},
+      this.authHeader()
+    );
+  }
+
+  rejectOfficer(id: number) {
+    return this.http.delete(
+      `${this.api}/reject-officer/${id}`,
+      this.authHeader()
+    );
+  }
+
+  getLoanTypes() {
+  return this.http.get<any[]>(`${this.api}/loan-types`);
+}
+
+updateLoanType(id:any, data:any){
+  return this.http.put<any>(this.api + '/loan-types/' + id, data);
 }
 
 }

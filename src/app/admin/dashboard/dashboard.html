@@ -1,45 +1,18 @@
-<div class="layout">
-  <aside class="sidebar">
-    <h2>LMS</h2>
-    <a class="active">Dashboard</a>
-    <a (click)="goPending()">Pending Officers</a>
-    <a>Loan Types</a>
-    <a>Customers</a>
-    <a>All Loans</a>
-    <a>Notifications</a>
-    <a (click)="logout()">Logout</a>
-  </aside>
+<h1>Admin Analytics Dashboard</h1>
 
-  <main class="content">
-    <h1>Admin Analytics Dashboard</h1>
+<div class="kpi-row">
+ <div class="kpi-card">{{ totalCustomers }}<p>Total Customers</p></div>
+ <div class="kpi-card">{{ activeLoans }}<p>Active Loans</p></div>
+ <div class="kpi-card">{{ closedLoans }}<p>Closed Loans</p></div>
+</div>
 
-    <div class="kpi-row">
-      <div class="kpi-card">
-        <h2>{{ totalCustomers }}</h2>
-        <p>Total Customers</p>
-      </div>
-      <div class="kpi-card">
-        <h2>{{ activeLoans }}</h2>
-        <p>Active Loans</p>
-      </div>
-      <div class="kpi-card">
-        <h2>{{ closedLoans }}</h2>
-        <p>Closed Loans</p>
-      </div>
-    </div>
-
-    <div class="grid">
-      <div class="card">
-        <h3>Loan Status Distribution</h3>
-        <canvas id="statusChart"></canvas>
-      </div>
-
-      <div class="card">
-        <h3>Customer Loan Distribution</h3>
-        <canvas id="customerChart"></canvas>
-      </div>
-      <a routerLink="/admin/pending-officers">Pending Officers</a>
-
-    </div>
-  </main>
+<div class="grid">
+ <div class="card">
+   <h3>Loan Status Distribution</h3>
+   <canvas id="statusChart"></canvas>
+ </div>
+ <div class="card">
+   <h3>Customer Loan Distribution</h3>
+   <canvas id="customerChart"></canvas>
+ </div>
 </div>

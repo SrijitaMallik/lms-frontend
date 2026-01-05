@@ -1,0 +1,17 @@
+<div class="sidebar">
+  <h2>LMS</h2>
+
+  <a routerLink="/admin" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Dashboard</a>
+  <a routerLink="/admin/pending-officers" routerLinkActive="active">Pending Officers</a>
+  <a routerLink="/admin/loan-types" routerLinkActive="active">Loan Types</a>
+  <a routerLink="/admin/customers" routerLinkActive="active">Customers</a>
+  <a routerLink="/admin/all-loans" routerLinkActive="active">All Loans</a>
+  <a routerLink="/admin/notifications" routerLinkActive="active">Notifications</a>
+
+  <div style="flex:1"></div>
+  <a style="background:#ef4444;color:white">Logout</a>
+</div>
+
+<div class="content">
+  <router-outlet></router-outlet>
+</div>

@@ -1,26 +1,46 @@
-.officer-table{
-  width:100%;
-  border-collapse:collapse;
+.card {
+  background: white;
+  padding: 25px;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
 }
-.officer-table th{
-  background:#f4f7fb;
-  padding:12px;
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
 }
-.officer-table td{
-  padding:12px;
-  border-bottom:1px solid #eee;
+
+th {
+  text-align: left;
+  padding: 12px;
+  color: #475569;
 }
-.badge.pending{
-  background:#ff9800;
-  color:white;
-  padding:4px 10px;
-  border-radius:20px;
+
+td {
+  padding: 12px;
 }
-.btn{
-  border:none;
-  padding:6px 14px;
-  border-radius:6px;
-  cursor:pointer;
+
+.pending {
+  color: #f59e0b;
+  font-weight: 600;
 }
-.approve{background:#4caf50;color:white}
-.reject{background:#f44336;color:white;margin-left:6px}
+
+.approve {
+  background: #22c55e;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.reject {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  margin-left: 8px;
+  cursor: pointer;
+}
