@@ -1,0 +1,51 @@
+.page{
+  height:100vh;
+  background:linear-gradient(135deg,#a78bfa,#6366f1);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.card{
+  width:450px;
+  background:white;
+  padding:60px;
+  border-radius:25px;
+  box-shadow:0 25px 60px rgba(0,0,0,0.2);
+}
+
+.left input, select{
+  width:100%;
+  padding:14px;
+  margin-bottom:15px;
+  border-radius:10px;
+  border:1px solid #ddd;
+}
+
+.register-btn{
+  width:100%;
+  padding:14px;
+  background:#6366f1;
+  color:white;
+  border:none;
+  border-radius:12px;
+}
+
+.login-link{
+  margin-top:20px;
+  text-align:center;
+}
+.btn-primary {
+  width: 100%;
+  padding: 14px;
+  background: #6c63ff;
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background: #5a52e0;
+}
