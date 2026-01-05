@@ -33,6 +33,8 @@ interface LoanStatus {
 })
 export class Dashboard implements OnInit {
 
+  private loaded = false;   // 🔥 prevents duplicate calls
+
   totalCustomers = 0;
   activeLoans = 0;
   closedLoans = 0;
@@ -49,8 +51,12 @@ export class Dashboard implements OnInit {
   ) {}
 
   ngOnInit() {
+    if (this.loaded) return;
+    this.loaded = true;
+    this.loadDashboard();
+  }
 
-    // Active vs Closed KPI
+  loadDashboard() {
     this.http.get<ActiveVsClosed>('http://localhost:5209/api/admin/reports/active-vs-closed')
       .subscribe(res => {
         this.activeLoans = res.active;
@@ -58,7 +64,6 @@ export class Dashboard implements OnInit {
         this.cdr.detectChanges();
       });
 
-    // Customer Summary
     this.http.get<CustomerSummary[]>('http://localhost:5209/api/admin/reports/customer-summary')
       .subscribe(res => {
         this.customerSummary = res;
@@ -67,7 +72,6 @@ export class Dashboard implements OnInit {
         setTimeout(() => this.drawCustomerChart(), 0);
       });
 
-    // Loan Status Pie
     this.admin.getLoanStatus().subscribe(res => {
       this.loanStatus = res;
       setTimeout(() => this.drawChart(), 0);
@@ -116,5 +120,4 @@ export class Dashboard implements OnInit {
     localStorage.clear();
     location.href = '/';
   }
-  
 }
