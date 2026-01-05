@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -9,4 +9,15 @@ import { CommonModule } from '@angular/common';
   templateUrl: './admin-layout.html',
   styleUrls: ['./admin-layout.css']
 })
-export class AdminLayout {}
+export class AdminLayout {
+  constructor(private router: Router) {}
+
+  forceNavigate(event: Event, path: string) {
+    event.preventDefault();
+    this.router.navigate([path]).then(() => {
+      console.log('Navigation successful to:', path);
+    }).catch(err => {
+      console.error('Navigation failed:', err);
+    });
+  }
+}

@@ -12,20 +12,28 @@ import { AdminService } from '../../services/admin';
 export class PendingOfficers implements OnInit {
 
   officers: any[] = [];
+  loading: boolean = true; // ✅ ADD THIS
 
-  constructor(private admin: AdminService) {}
+  constructor(private admin: AdminService) {
+    console.log('PendingOfficers constructor');
+  }
 
   ngOnInit(): void {
+    console.log('PendingOfficers ngOnInit');
     this.load();
   }
 
   load() {
+    this.loading = true; // ✅ ADD THIS
     this.admin.getPendingOfficers().subscribe({
       next: (res) => {
+        console.log('Officers loaded:', res); // ✅ ADD THIS
         this.officers = res;
+        this.loading = false; // ✅ ADD THIS
       },
       error: (err) => {
         console.error(err);
+        this.loading = false; // ✅ ADD THIS
       }
     });
   }
@@ -44,4 +52,3 @@ export class PendingOfficers implements OnInit {
     });
   }
 }
-

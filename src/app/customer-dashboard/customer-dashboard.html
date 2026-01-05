@@ -1,0 +1,174 @@
+<div class="dashboard-container">
+  <!-- Notification Toast -->
+  <div *ngIf="notification" class="notification" [ngClass]="'notification-' + notification.type">
+    <div class="notification-content">
+      <span>{{ notification.message }}</span>
+      <button class="notification-close" (click)="closeNotification()">✕</button>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <div class="header">
+    <div>
+      <h1>Dashboard</h1>
+      <p class="welcome-text">Welcome back!</p>
+    </div>
+    <div class="header-actions">
+      <button class="new-app-btn" (click)="router.navigate(['/apply-loan'])">+ New Application</button>
+      <button class="logout-btn" (click)="logout()">Logout</button>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon icon-outstanding">📋</div>
+      <div class="stat-content">
+        <p class="stat-label">Total Outstanding</p>
+        <h3 class="stat-value">₹{{totalOutstanding | number:'1.2-2'}}</h3>
+        <span class="stat-due">Due on 15 Jan 2025</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon icon-emi">📅</div>
+      <div class="stat-content">
+        <p class="stat-label">Next EMI Due</p>
+        <h3 class="stat-value">₹{{nextEmi | number:'1.2-2'}}</h3>
+        <span class="stat-due">Due in 5 days</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon icon-loans">💼</div>
+      <div class="stat-content">
+        <p class="stat-label">Active Loans</p>
+        <h3 class="stat-value">{{activeLoans}}</h3>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon icon-paid">✓</div>
+      <div class="stat-content">
+        <p class="stat-label">Total Paid</p>
+        <h3 class="stat-value">₹{{totalPaid | number:'1.2-2'}}</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Grid -->
+  <div class="content-grid">
+    <!-- My EMIs Section -->
+    <div class="emi-section">
+      <h2>My EMIs</h2>
+      <div class="emi-list">
+        <div class="emi-card" *ngFor="let e of emis">
+          <div class="emi-header">
+            <h4>{{e.loanType}} - PL{{e.loanApplicationId}}</h4>
+            <span class="emi-status" [ngClass]="{'status-pending': e.pendingMonths > 0, 'status-paid': e.pendingMonths == 0}">
+              {{e.pendingMonths > 0 ? 'Pending' : 'Paid'}}
+            </span>
+          </div>
+          <div class="emi-details">
+            <p><span>EMI Amount:</span> <strong>₹{{e.emi | number:'1.2-2'}}</strong></p>
+            <p><span>Pending Months:</span> <strong>{{e.pendingMonths}}</strong></p>
+          </div>
+          <button *ngIf="e.pendingMonths > 0" class="pay-btn" [disabled]="payingId === e.loanApplicationId" (click)="pay(e.loanApplicationId)">
+            {{ payingId === e.loanApplicationId ? 'Processing...' : 'Pay Now' }}
+          </button>
+          <span class="paid-badge" *ngIf="e.pendingMonths == 0">Paid</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions Section -->
+    <div class="quick-actions">
+      <h2>Quick Actions</h2>
+      <div class="actions-list">
+        <button class="action-btn" (click)="router.navigate(['/my-loans'])">
+          <span class="action-icon">💼</span>
+          <span>My Loans</span>
+        </button>
+        <button class="action-btn" (click)="scrollToReceipts()">
+          <span class="action-icon">📄</span>
+          <span>View Receipts</span>
+        </button>
+        <button class="action-btn">
+          <span class="action-icon">🧮</span>
+          <span>EMI Calculator</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Transactions Section -->
+  <div class="transactions-section">
+    <h2>Recent Transactions</h2>
+    <div class="table-wrapper">
+      <table class="transactions-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Loan ID</th>
+            <th>Type</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Receipt</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of receipts" (click)="openReceiptModal(r)" class="clickable-row">
+            <td>{{r.paidOn | date:'dd MMM yyyy'}}</td>
+            <td>{{r.loanApplicationId}}</td>
+            <td>EMI Payment</td>
+            <td>₹{{r.paidAmount | number:'1.2-2'}}</td>
+            <td><span class="status-badge success">Success</span></td>
+            <td><a href="javascript:void(0);" class="download-link" (click)="downloadReceipt(); $event.stopPropagation()">Download</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Receipt Modal -->
+<div *ngIf="showReceiptModal" class="modal-overlay" (click)="closeReceiptModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Receipt Details</h2>
+      <button class="modal-close" (click)="closeReceiptModal()">✕</button>
+    </div>
+    
+    <div class="modal-body" *ngIf="selectedReceipt">
+      <div class="receipt-item">
+        <label>Receipt ID</label>
+        <p>{{selectedReceipt.receiptId}}</p>
+      </div>
+      
+      <div class="receipt-item">
+        <label>Loan Application ID</label>
+        <p>{{selectedReceipt.loanApplicationId}}</p>
+      </div>
+      
+      <div class="receipt-item">
+        <label>EMI Schedule ID</label>
+        <p>{{selectedReceipt.emiScheduleId}}</p>
+      </div>
+      
+      <div class="receipt-item">
+        <label>Paid Amount</label>
+        <p class="amount">₹{{selectedReceipt.paidAmount | number:'1.2-2'}}</p>
+      </div>
+      
+      <div class="receipt-item">
+        <label>Payment Date</label>
+        <p>{{selectedReceipt.paidOn | date:'dd MMM yyyy, hh:mm a'}}</p>
+      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeReceiptModal()">Close</button>
+      <button class="btn-primary" (click)="downloadReceipt()">📥 Download Receipt</button>
+    </div>
+  </div>
+</div>

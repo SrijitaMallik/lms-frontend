@@ -25,6 +25,8 @@
   color: #c7d2fe;
   margin-bottom: 6px;
   transition: 0.2s;
+  display: block;
+  cursor: pointer;
 }
 
 .sidebar a:hover,

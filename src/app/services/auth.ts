@@ -10,14 +10,17 @@ export class AuthService {
   constructor(private http: HttpClient) {}
 
   login(data:any){
-    return this.http.post<any>(`${this.api}/login`, data);
+    return this.http.post<any>(`${this.api}/login`, data, { responseType: 'json' });
   }
 
   saveLogin(token: string) {
+  console.log('Saving token:', token);
   localStorage.setItem("token", token);
 
   const decoded: any = jwtDecode(token);
-  localStorage.setItem("role", decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"]);
+  const role = decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+  console.log('Decoded role:', role);
+  localStorage.setItem("role", role);
 }
 
  register(data: any){
@@ -29,5 +32,11 @@ export class AuthService {
 
   isLoggedIn(){
     return !!localStorage.getItem("token");
+  }
+
+  logout(){
+    console.log('Logging out...');
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
   }
 }

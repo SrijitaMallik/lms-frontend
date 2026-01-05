@@ -1,7 +1,13 @@
 <div class="table-card">
   <h2>Pending Loan Officers</h2>
 
-  <table>
+  <!-- ✅ ADD LOADING STATE -->
+  <div *ngIf="loading" style="padding: 20px; text-align: center;">
+    Loading officers...
+  </div>
+
+  <!-- ✅ ONLY SHOW TABLE WHEN NOT LOADING -->
+  <table *ngIf="!loading">
     <thead>
       <tr>
         <th>#</th>

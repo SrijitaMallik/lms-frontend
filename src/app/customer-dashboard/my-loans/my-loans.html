@@ -1,0 +1,79 @@
+<div class="my-loans-container">
+
+  <!-- Back Link -->
+  <a href="javascript:void(0);" class="back-link" (click)="goBack()">
+    ← Back to Dashboard
+  </a>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1>My Loans</h1>
+    <p>View all your loan applications and their status</p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading">
+    <div class="spinner"></div>
+    <p>Loading your loans...</p>
+  </div>
+
+  <!-- Loans Grid -->
+  <div *ngIf="!isLoading && loans.length > 0" class="loans-grid">
+    <div class="loan-card" *ngFor="let loan of loans">
+
+      <div class="loan-header">
+        <div class="loan-info">
+          <h3>Loan #{{ loan.loanApplicationId }}</h3>
+          <p class="loan-type">
+            {{ loan.loanType || 'Loan Application' }}
+          </p>
+        </div>
+
+        <span
+          class="loan-status"
+          [ngClass]="'status-' + (loan.status | lowercase)">
+          {{ loan.status }}
+        </span>
+      </div>
+
+      <div class="loan-details">
+
+        <div class="detail-item">
+          <label>Loan Amount</label>
+          <p class="amount">
+            ₹{{ loan.loanAmount | number:'1.2-2' }}
+          </p>
+        </div>
+
+        <div class="detail-item">
+          <label>Tenure</label>
+          <p>{{ loan.tenureMonths }} months</p>
+        </div>
+
+        <div class="detail-item">
+          <label>Interest Rate</label>
+          <p>{{ loan.interestRate ?? 'N/A' }}% p.a</p>
+        </div>
+
+        <div class="detail-item">
+          <label>Application Date</label>
+          <p>
+            {{ loan.applicationDate ? (loan.applicationDate | date:'dd MMM yyyy') : 'N/A' }}
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && loans.length === 0" class="empty-state">
+    <div class="empty-icon">💼</div>
+    <h2>No Loans Found</h2>
+    <p>You haven't applied for any loans yet.</p>
+    <button class="btn-primary" (click)="router.navigate(['/apply-loan'])">
+      Apply for a Loan
+    </button>
+  </div>
+
+</div>
