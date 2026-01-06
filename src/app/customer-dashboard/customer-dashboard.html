@@ -131,7 +131,8 @@
       <td>EMI Payment</td>
       <td>₹{{r.paidAmount}}</td>
       <td><span class="status-badge success">Success</span></td>
-      <td><a href="#" (click)="downloadReceipt();$event.stopPropagation()">Download</a></td>
+      <td><a href="javascript:void(0)" (click)="downloadReceipt(); $event.preventDefault(); $event.stopPropagation()">Download</a>
+
     </tr>
   </table>
 </div>
