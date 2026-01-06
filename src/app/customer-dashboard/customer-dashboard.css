@@ -247,3 +247,6 @@
     padding: 14px 16px 14px 42px;
   }
 }
+html, body {
+  overflow-y: scroll !important;
+}

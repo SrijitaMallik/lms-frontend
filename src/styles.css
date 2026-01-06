@@ -10,3 +10,9 @@ html,body{
   overflow:hidden;
   font-family:'Segoe UI',sans-serif;
 }
+body.modal-open {
+  overflow: hidden;
+}
+html, body {
+  overflow-y: scroll !important;
+}

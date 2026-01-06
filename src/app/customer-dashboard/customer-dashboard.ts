@@ -144,15 +144,16 @@ export class CustomerDashboardComponent implements OnInit {
   // ---------------- RECEIPT ----------------
 
   openReceiptModal(r:any){
-    this.selectedReceipt=r;
-    this.showReceiptModal=true;
-    document.body.style.overflow='hidden';
-  }
+  this.selectedReceipt = r;
+  this.showReceiptModal = true;
+  document.body.classList.add('modal-open');
+}
 
-  closeReceiptModal(){
-    this.showReceiptModal=false;
-    document.body.style.overflow='auto';
-  }
+closeReceiptModal(){
+  this.showReceiptModal = false;
+  document.body.classList.remove('modal-open');
+}
+
 
   downloadReceipt(){ alert("Receipt downloaded successfully!"); }
 
