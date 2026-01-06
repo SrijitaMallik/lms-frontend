@@ -32,8 +32,8 @@ export class Login {
           this.router.navigate(['/admin']);
         } else if(role === 'Customer'){
           this.router.navigate(['/customer-dashboard']);
-        } else if(role === 'LoanOfficer'){
-          this.router.navigate(['/officer']);
+        } else if(role === "LoanOfficer"){
+   this.router.navigate(['/loan-officer/dashboard']);
         } else {
           this.router.navigate(['/customer']);
         }

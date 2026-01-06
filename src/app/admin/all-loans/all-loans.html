@@ -1,0 +1,12 @@
+<h2>Verified Loans</h2>
+<table>
+<tr *ngFor="let l of loans">
+<td>{{l.customerId}}</td>
+<td>{{l.loanAmount | number}}</td>
+<td>{{l.status}}</td>
+<td>
+<button class="green" (click)="approve(l.loanApplicationId)">Approve</button>
+<button class="red" (click)="reject(l.loanApplicationId)">Reject</button>
+</td>
+</tr>
+</table>

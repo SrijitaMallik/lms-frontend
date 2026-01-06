@@ -1,67 +1,24 @@
 import { HttpClient,HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
-@Injectable({ providedIn: 'root' })
-export class AdminService {
-  api = 'http://localhost:5209/api/admin';
+@Injectable({providedIn:'root'})
+export class AdminService{
+ api='http://localhost:5209/api/admin';
+ constructor(private http:HttpClient){}
 
-  constructor(private http:HttpClient) {}
+ getPendingOfficers(){ return this.http.get<any[]>(`${this.api}/pending-officers`); }
+ approveOfficer(id:number){ return this.http.put(`${this.api}/approve-officer/${id}`,{}); }
+ rejectOfficer(id:number){ return this.http.delete(`${this.api}/reject-officer/${id}`); }
 
-  private authHeader(){
-    const token = localStorage.getItem("token");
-    return {
-      headers: new HttpHeaders({
-        'Authorization': 'Bearer ' + token
-      })
-    };
-  }
+ getVerifiedLoans(){ return this.http.get<any[]>(`${this.api}/verified-loans`); }
+ approveLoan(id:number){ return this.http.put(`${this.api}/approve-loan/${id}`,{}); }
+ rejectLoan(id:number){ return this.http.put(`${this.api}/reject-loan/${id}`,{}); }
 
-  approve(id:any){
-    return this.http.put(`${this.api}/approve-officer/${id}`,{}, this.authHeader());
-  }
+ getLoanStatus(){ return this.http.get<any[]>(`${this.api}/reports/loans-by-status`); }
+ getActiveVsClosed(){ return this.http.get<any>(`${this.api}/reports/active-vs-closed`); }
+ getCustomerSummary(){ return this.http.get<any[]>(`${this.api}/reports/customer-summary`); }
 
-  reject(id:any){
-    return this.http.delete(`${this.api}/reject-officer/${id}`, this.authHeader());
-  }
-  getLoanStatus(){
-    return this.http.get<any[]>(`${this.api}/reports/loans-by-status`);
-  }
-
-  getCustomerSummary(){
-    return this.http.get<any[]>(`${this.api}/reports/customer-summary`);
-  }
-
-  getActiveVsClosed(){
-    return this.http.get<any>(`${this.api}/reports/active-vs-closed`);
-  }
-  getPendingOfficers() {
-    return this.http.get<any[]>(
-      `${this.api}/pending-officers`,
-      this.authHeader()
-    );
-  }
-
-  approveOfficer(id: number) {
-    return this.http.put(
-      `${this.api}/approve-officer/${id}`,
-      {},
-      this.authHeader()
-    );
-  }
-
-  rejectOfficer(id: number) {
-    return this.http.delete(
-      `${this.api}/reject-officer/${id}`,
-      this.authHeader()
-    );
-  }
-
-  getLoanTypes() {
-  return this.http.get<any[]>(`${this.api}/loan-types`);
-}
-
-updateLoanType(id:any, data:any){
-  return this.http.put<any>(this.api + '/loan-types/' + id, data);
-}
-
+ getLoanTypes(){ return this.http.get<any[]>(`${this.api}/loan-types`); }
+ getLoanType(id:number){ return this.http.get<any>(`${this.api}/loan-types/${id}`); }
+ updateLoanType(id:number,body:any){ return this.http.put(`${this.api}/loan-types/${id}`,body); }
 }

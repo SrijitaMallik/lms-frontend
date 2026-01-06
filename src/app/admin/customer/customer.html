@@ -1,0 +1,21 @@
+<h2>Customers</h2>
+
+<table>
+  <tr>
+    <th>Customer ID</th>
+    <th>Total Loans</th>
+    <th>Active</th>
+    <th>Closed</th>
+    <th>Rejected</th>
+    <th>Total Amount</th>
+  </tr>
+
+  <tr *ngFor="let c of customers">
+    <td>{{c.customerId}}</td>
+    <td>{{c.totalLoans}}</td>
+    <td>{{c.activeLoans}}</td>
+    <td>{{c.closedLoans}}</td>
+    <td>{{c.rejectedLoans}}</td>
+    <td>₹{{c.totalAmount | number}}</td>
+  </tr>
+</table>
