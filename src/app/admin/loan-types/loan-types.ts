@@ -1,101 +1,138 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../services/admin';
-import { ChangeDetectorRef, NgZone } from '@angular/core';
 
 @Component({
- selector:'app-loan-types',
- standalone:true,
- imports:[CommonModule,FormsModule],
- templateUrl:'./loan-types.html',
- styleUrls:['./loan-types.css']
+  selector: 'app-loan-types',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './loan-types.html',
+  styleUrls: ['./loan-types.css']
 })
-export class LoanTypes implements OnInit{
+export class LoanTypes implements OnInit {
 
- loanTypes:any[]=[];
- editData:any=null;
- showAdd=false;
-saving = false;
-creating = false;
+  // ✅ SIGNALS
+  loanTypes = signal<any[]>([]);
+  editData = signal<any>(null);
+  showAdd = signal(false);
+  saving = signal(false);
+  creating = signal(false);
+  loading = signal(false);
 
- newLoan:any={
-   loanTypeName:'',
-   interestRate:0,
-   minAmount:0,
-   maxAmount:0,
-   maxTenureMonths:0
- };
-
- constructor(private admin:AdminService, private zone:NgZone, private cdr:ChangeDetectorRef){}
-
-
- ngOnInit(){ this.load(); }
-
- load(){
-  this.admin.getLoanTypes().subscribe(res=> this.loanTypes=res);
- }
-
- edit(l:any){
-  this.editData={...l};
- }
-
- openAdd(){
-  this.showAdd=true;
- }
-
- save(){
-  if(this.saving) return;
-  this.saving = true;
-
-  const data = {...this.editData};
-  this.editData = null;      // close popup instantly
-  this.cdr.detectChanges();
-
-  this.admin.updateLoanType(data.loanTypeId, data).subscribe(()=>{
-    // 🔥 wait 200ms for DB commit
-    setTimeout(() => {
-      this.load();
-      this.saving = false;
-    }, 200);
+  newLoan = signal({
+    loanTypeName: '',
+    interestRate: 0,
+    minAmount: 0,
+    maxAmount: 0,
+    maxTenureMonths: 0
   });
-}
 
- create(){
-  if(this.creating) return;
+  private admin = inject(AdminService);
 
-  if(
-    !this.newLoan.loanTypeName ||
-    this.newLoan.interestRate <= 0 ||
-    this.newLoan.minAmount <= 0 ||
-    this.newLoan.maxAmount <= 0 ||
-    this.newLoan.maxTenureMonths <= 0
-  ){
-    alert("Fill all fields correctly");
-    return;
+  ngOnInit() {
+    this.load();
   }
 
-  const data = {...this.newLoan};
-  this.showAdd = false;        // close popup instantly
-  this.cdr.detectChanges();
+  load() {
+    this.loading.set(true);
+    this.admin.getLoanTypes().subscribe({
+      next: (res) => {
+        this.loanTypes.set(res);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        console.error('Error loading loan types:', err);
+        this.loading.set(false);
+      }
+    });
+  }
 
-  this.admin.addLoanType(data).subscribe(()=>{
-    setTimeout(() => {
-      this.newLoan={loanTypeName:'',interestRate:0,minAmount:0,maxAmount:0,maxTenureMonths:0};
-      this.load();
-      this.creating = false;
-    }, 200);
-  });
-}
+  edit(l: any) {
+    this.editData.set({ ...l });
+  }
 
+  openAdd() {
+    this.showAdd.set(true);
+  }
 
-disable(id:number){
-  this.loanTypes=this.loanTypes.filter(x=>x.loanTypeId!==id);
-  this.admin.disableLoanType(id).subscribe();
- }
+  save() {
+    if (this.saving()) return;
+    this.saving.set(true);
 
- cancel(){
-   this.editData=null;
-   this.showAdd=false;
- }
+    const data = { ...this.editData() };
+    this.editData.set(null);
+
+    this.admin.updateLoanType(data.loanTypeId, data).subscribe({
+      next: () => {
+        setTimeout(() => {
+          this.load();
+          this.saving.set(false);
+        }, 200);
+      },
+      error: (err) => {
+        console.error('Error saving:', err);
+        alert('Failed to save loan type');
+        this.saving.set(false);
+      }
+    });
+  }
+
+  create() {
+    if (this.creating()) return;
+
+    const loan = this.newLoan();
+    if (
+      !loan.loanTypeName ||
+      loan.interestRate <= 0 ||
+      loan.minAmount <= 0 ||
+      loan.maxAmount <= 0 ||
+      loan.maxTenureMonths <= 0
+    ) {
+      alert('Fill all fields correctly');
+      return;
+    }
+
+    const data = { ...loan };
+    this.showAdd.set(false);
+    this.creating.set(true);
+
+    this.admin.addLoanType(data).subscribe({
+      next: () => {
+        setTimeout(() => {
+          this.newLoan.set({
+            loanTypeName: '',
+            interestRate: 0,
+            minAmount: 0,
+            maxAmount: 0,
+            maxTenureMonths: 0
+          });
+          this.load();
+          this.creating.set(false);
+        }, 200);
+      },
+      error: (err) => {
+        console.error('Error creating:', err);
+        alert('Failed to create loan type');
+        this.creating.set(false);
+        this.showAdd.set(true);
+      }
+    });
+  }
+
+  disable(id: number) {
+    this.loanTypes.set(this.loanTypes().filter(x => x.loanTypeId !== id));
+    this.admin.disableLoanType(id).subscribe({
+      error: (err) => {
+        console.error('Error disabling:', err);
+        alert('Failed to disable loan type');
+        this.load();
+      }
+    });
+  }
+
+  cancel() {
+    this.editData.set(null);
+    this.showAdd.set(false);
+  }
 }

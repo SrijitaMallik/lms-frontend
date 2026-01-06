@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { OfficerService } from '../services/officer.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -12,60 +12,124 @@ import { FormsModule } from '@angular/forms';
 })
 export class OfficerApplicationsComponent implements OnInit {
 
-  allLoans:any[] = [];
-  loans:any[] = [];
+  // ✅ SIGNALS
+  allLoans = signal<any[]>([]);
+  loans = signal<any[]>([]);
+  
+  page = signal(1);
+  pageSize = signal(5);
+  
+  searchText = signal('');
+  statusFilter = signal('');
+  loading = signal(false);
+  approving = signal(false);
 
-  page = 1;
-  pageSize = 5;
-  totalPages = 1;
+  private service = inject(OfficerService);
 
-  searchText = '';
-  statusFilter = '';
+  // ✅ Computed for pagination
+  totalPages = computed(() => 
+    Math.ceil(this.loans().length / this.pageSize())
+  );
 
-  constructor(private service: OfficerService) {}
+  pagedLoans = computed(() => {
+    const start = (this.page() - 1) * this.pageSize();
+    return this.loans().slice(start, start + this.pageSize());
+  });
 
   ngOnInit() {
     this.load();
   }
 
-  load(){
-    this.service.getPendingLoans().subscribe(res=>{
-      this.allLoans = res;
-      this.applyFilter();
+  load() {
+    this.loading.set(true);
+    this.service.getPendingLoans().subscribe({
+      next: (res) => {
+        this.allLoans.set(res);
+        this.applyFilter();
+        this.loading.set(false);
+      },
+      error: (err) => {
+        console.error('Error loading loans:', err);
+        this.loading.set(false);
+      }
     });
   }
 
-  applyFilter(){
-    this.loans = this.allLoans.filter(l=>{
-      const matchStatus = !this.statusFilter || l.status === this.statusFilter;
-      const matchSearch = !this.searchText || (l.customerName||'').toLowerCase().includes(this.searchText.toLowerCase());
+  applyFilter() {
+    const search = this.searchText().toLowerCase();
+    const status = this.statusFilter();
+
+    const filtered = this.allLoans().filter(l => {
+      const matchStatus = !status || l.status === status;
+      const matchSearch = !search || (l.customerName || '').toLowerCase().includes(search);
       return matchStatus && matchSearch;
     });
 
-    this.totalPages = Math.ceil(this.loans.length / this.pageSize);
-    this.changePage(1);
+    this.loans.set(filtered);
+    this.page.set(1);
   }
 
-  get pagedLoans(){
-    const start = (this.page-1)*this.pageSize;
-    return this.loans.slice(start,start+this.pageSize);
+  changePage(p: number) {
+    this.page.set(p);
   }
 
-  changePage(p:number){ this.page = p; }
-  nextPage(){ if(this.page < this.totalPages) this.page++; }
-  prevPage(){ if(this.page > 1) this.page--; }
+  nextPage() {
+    if (this.page() < this.totalPages()) {
+      this.page.update(p => p + 1);
+    }
+  }
 
-  approve(id:number){
-    this.service.approveLoan(id).subscribe(()=>{
-      alert("Loan Approved");
-      this.load();
+  prevPage() {
+    if (this.page() > 1) {
+      this.page.update(p => p - 1);
+    }
+  }
+
+  approve(id: number) {
+    if (this.approving()) return;
+    this.approving.set(true);
+    console.log('Approving loan:', id);
+
+    this.service.approveLoan(id).subscribe({
+      next: (res) => {
+        console.log('Approval response:', res);
+        alert('Loan Approved Successfully ✅');
+        
+        // Remove from current list immediately
+        this.allLoans.set(this.allLoans().filter(l => l.loanApplicationId !== id));
+        this.applyFilter();
+        
+        this.approving.set(false);
+      },
+      error: (err) => {
+        console.error('Error approving:', err);
+        alert('Failed to approve loan: ' + (err.error?.message || err.message));
+        this.approving.set(false);
+      }
     });
   }
 
-  reject(id:number){
-    this.service.rejectLoan(id).subscribe(()=>{
-      alert("Loan Rejected");
-      this.load();
+  reject(id: number) {
+    if (this.approving()) return;
+    this.approving.set(true);
+    console.log('Rejecting loan:', id);
+
+    this.service.rejectLoan(id).subscribe({
+      next: (res) => {
+        console.log('Rejection response:', res);
+        alert('Loan Rejected Successfully ❌');
+        
+        // Remove from current list immediately
+        this.allLoans.set(this.allLoans().filter(l => l.loanApplicationId !== id));
+        this.applyFilter();
+        
+        this.approving.set(false);
+      },
+      error: (err) => {
+        console.error('Error rejecting:', err);
+        alert('Failed to reject loan: ' + (err.error?.message || err.message));
+        this.approving.set(false);
+      }
     });
   }
 }

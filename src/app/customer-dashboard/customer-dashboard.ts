@@ -13,205 +13,127 @@ import { AuthService } from '../services/auth';
 })
 export class CustomerDashboardComponent implements OnInit {
 
-  loans:any[] = [];
-  emis:any[] = [];
-  receipts:any[] = [];
+  loans:any[]=[];
+  emis:any[]=[];
+  receipts:any[]=[];
 
-  totalOutstanding = 0;
-  nextEmi = 0;
-  activeLoans = 0;
-  totalPaid = 0;
+  totalOutstanding=0;
+  nextEmi=0;
+  activeLoans=0;
+  totalPaid=0;
 
-  notification: { type: 'success' | 'error', message: string } | null = null;
-  payingId: number | null = null;
-  selectedReceipt: any = null;
-  showReceiptModal = false;
+  notification:any=null;
+  payingId:number|null=null;
 
-  constructor(private service:CustomerDashboardService, private auth:AuthService, public router:Router, private cdr: ChangeDetectorRef){}
+  showReceiptModal=false;
+  selectedReceipt:any=null;
 
-  ngOnInit() {
+  // 🔹 popup vars
+  showPaymentModal=false;
+  selectedEmi:any=null;
+
+  constructor(private service:CustomerDashboardService, private auth:AuthService, public router:Router, private cdr:ChangeDetectorRef){}
+
+  ngOnInit(){
+    this.loadDashboard();
+  }
+
+  loadDashboard(){
+
+    this.totalOutstanding=0;
+    this.totalPaid=0;
+    this.receipts=[];
 
     this.service.getMyLoans().subscribe((loanRes:any)=>{
-      console.log('LOANS RESPONSE:', loanRes);
-      this.loans = loanRes;
-      this.activeLoans = this.loans.filter(l=>l.status=="Approved").length;
+      this.loans=loanRes || [];
+      this.activeLoans=this.loans.filter(l=>l.status=="Approved").length;
       this.cdr.detectChanges();
     });
 
-    this.service.getMyEmis().subscribe((emiRes:any)=>{
-      console.log('EMIS RESPONSE:', emiRes);
-      console.log('First EMI object:', emiRes[0]);
-      console.log('EMI properties:', Object.keys(emiRes[0]));
-      this.emis = emiRes;
-      this.receipts = []; // Reset receipts
-
-      if(this.emis.length>0){
-        this.nextEmi = this.emis[0].emi;
-      }
+    this.service.getMyEmis().subscribe((emis:any)=>{
+      this.emis=emis || [];
+      this.nextEmi=this.emis.length?this.emis[0].emi:0;
 
       this.emis.forEach(e=>{
         this.service.getOutstanding(e.loanApplicationId).subscribe((o:any)=>{
-          console.log('OUTSTANDING RESPONSE:', o);
-          this.totalOutstanding += o.outstanding;
+          this.totalOutstanding += o?.outstanding || 0;
           this.cdr.detectChanges();
         });
 
         this.service.getReceipts(e.loanApplicationId).subscribe((r:any)=>{
-          console.log('RECEIPTS RESPONSE:', r);
-          // Accumulate receipts instead of overwriting
           if(Array.isArray(r)){
-            this.receipts = [...this.receipts, ...r];
-          } else {
-            this.receipts.push(r);
+            this.receipts.push(...r);
+            r.forEach((x:any)=>this.totalPaid+=x.paidAmount);
           }
-          r.forEach((x:any)=> this.totalPaid += x.paidAmount);
           this.cdr.detectChanges();
         });
       });
+
       this.cdr.detectChanges();
     });
+  }
 
+  // ---------------- PAYMENT FLOW ----------------
+
+  openPaymentModal(emi:any){
+    this.selectedEmi=emi;
+    this.showPaymentModal=true;
+  }
+
+  closePaymentModal(){
+    this.showPaymentModal=false;
+  }
+
+  confirmPayment(){
+    this.pay(this.selectedEmi.loanApplicationId);
+    this.closePaymentModal();
   }
 
   pay(id:number){
-    this.payingId = id;
+    this.payingId=id;
     this.service.payEmi(id).subscribe({
-      next: (res:any) => {
-        console.log('Payment successful, response:', res);
-        this.notification = { type: 'success', message: 'EMI paid successfully! ✓' };
-        this.payingId = null;
-        
-        // Immediately update the EMI card on frontend by creating new array reference
-        this.emis = this.emis.map(emi => {
-          if(emi.loanApplicationId === id) {
-            return {
-              ...emi,
-              pendingMonths: Math.max(0, emi.pendingMonths - 1)
-            };
-          }
-          return emi;
-        });
-        
-        // Update nextEmi if first EMI is now paid
-        if(this.emis.length > 0 && this.emis[0].pendingMonths === 0) {
-          this.nextEmi = this.emis.length > 1 ? this.emis[1].emi : 0;
-        }
-        
-        this.cdr.detectChanges();
-        console.log('Frontend EMI updated:', this.emis);
-        
-        // Reset other data for refresh
-        this.totalOutstanding = 0;
-        this.totalPaid = 0;
-        this.receipts = [];
-        
-        // Small delay to ensure backend is updated
-        setTimeout(() => {
-          this.ngOnInit();
-          this.cdr.detectChanges();
-        }, 1000);
-        
-        // Hide notification after 4 seconds
-        setTimeout(() => {
-          this.notification = null;
-          this.cdr.detectChanges();
-        }, 4000);
+      next:()=>{
+        this.notification={type:'success',message:'EMI paid successfully ✓'};
+        this.payingId=null;
+        this.loadDashboard();
+        this.autoHide();
       },
-      error: (err:any) => {
-        console.error('Payment failed:', err);
-        console.error('Full error response:', err.error);
-        
-        // Check if the error response contains actual success message
-        if(err.status === 200 || (err.error && typeof err.error === 'string' && err.error.includes('success'))) {
-          // Success case but caught as error due to response type mismatch
-          this.notification = { type: 'success', message: 'EMI paid successfully! ✓' };
-          this.payingId = null;
-          
-          // Immediately update the EMI card
-          this.emis = this.emis.map(emi => {
-            if(emi.loanApplicationId === id) {
-              return {
-                ...emi,
-                pendingMonths: Math.max(0, emi.pendingMonths - 1)
-              };
-            }
-            return emi;
-          });
-          
-          if(this.emis.length > 0 && this.emis[0].pendingMonths === 0) {
-            this.nextEmi = this.emis.length > 1 ? this.emis[1].emi : 0;
-          }
-          
-          this.cdr.detectChanges();
-          
-          this.totalOutstanding = 0;
-          this.totalPaid = 0;
-          this.receipts = [];
-          
-          setTimeout(() => {
-            this.ngOnInit();
-            this.cdr.detectChanges();
-          }, 1000);
-          
-          setTimeout(() => {
-            this.notification = null;
-            this.cdr.detectChanges();
-          }, 4000);
-        } else {
-          this.notification = { type: 'error', message: 'Payment failed. Please try again.' };
-          this.payingId = null;
-          
-          setTimeout(() => {
-            this.notification = null;
-            this.cdr.detectChanges();
-          }, 4000);
-        }
+      error:()=>{
+        this.notification={type:'error',message:'Payment failed'};
+        this.payingId=null;
+        this.autoHide();
       }
     });
   }
 
-  closeNotification() {
-    this.notification = null;
+  autoHide(){
+    setTimeout(()=>{this.notification=null;this.cdr.detectChanges();},4000);
   }
 
-  openReceiptModal(receipt: any) {
-    this.selectedReceipt = receipt;
-    this.showReceiptModal = true;
-    // Disable body scroll when modal is open
-    document.body.style.overflow = 'hidden';
-    console.log('Opening receipt modal:', receipt);
+  // ---------------- RECEIPT ----------------
+
+  openReceiptModal(r:any){
+    this.selectedReceipt=r;
+    this.showReceiptModal=true;
+    document.body.style.overflow='hidden';
   }
 
-  closeReceiptModal() {
-    this.showReceiptModal = false;
-    this.selectedReceipt = null;
-    // Re-enable scroll
-    document.body.style.overflow = 'auto';
+  closeReceiptModal(){
+    this.showReceiptModal=false;
+    document.body.style.overflow='auto';
   }
 
-  downloadReceipt() {
-    if (this.selectedReceipt) {
-      // You can implement actual download functionality here
-      const receiptText = `
-PAYMENT RECEIPT
-================
-Receipt ID: ${this.selectedReceipt.receiptId}
-Loan Application ID: ${this.selectedReceipt.loanApplicationId}
-EMI Schedule ID: ${this.selectedReceipt.emiScheduleId}
-Paid Amount: ₹${this.selectedReceipt.paidAmount}
-Paid On: ${new Date(this.selectedReceipt.paidOn).toLocaleDateString()}
-      `;
-      console.log(receiptText);
-      alert('Receipt downloaded successfully!');
-    }
+  downloadReceipt(){
+    alert("Receipt downloaded successfully!");
   }
 
-  scrollToReceipts() {
-    const element = document.querySelector('.transactions-section');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+  scrollToReceipts(){
+    document.querySelector('.transactions-section')?.scrollIntoView({behavior:'smooth'});
   }
+closeNotification(){
+  this.notification = null;
+  this.cdr.detectChanges();
+}
 
   logout(){
     this.auth.logout();

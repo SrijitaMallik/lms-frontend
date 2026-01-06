@@ -1,30 +1,53 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class OfficerService {
 
-  api = 'http://localhost:5209/api/officer';
+  private api = 'http://localhost:5209/api/officer';
 
   constructor(private http: HttpClient) {}
 
-  getPendingLoans(){
+  // ✅ Get pending loans for approval
+  getPendingLoans(): Observable<any[]> {
+    console.log('Fetching pending loans...');
     return this.http.get<any[]>(`${this.api}/pending`);
   }
 
-  approveLoan(id:number){
-    return this.http.put(`${this.api}/approve/${id}`, {});
+  // ✅ Approve/Verify loan - PUT request
+  approveLoan(id: number): Observable<any> {
+    console.log('Approving loan:', id);
+    return this.http.put(
+      `${this.api}/verify/${id}`,
+      {},
+      {
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
   }
 
-  rejectLoan(id:number){
-    return this.http.put(`${this.api}/reject/${id}`, {});
+  // ✅ Reject loan - PUT request (same endpoint with reject status in body)
+  rejectLoan(id: number): Observable<any> {
+    console.log('Rejecting loan:', id);
+    return this.http.put(
+      `${this.api}/verify/${id}`,
+      { status: 'rejected' },
+      {
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
   }
 
-  getLoanHistory(){
+  // ✅ Get loan history
+  getLoanHistory(): Observable<any[]> {
+    console.log('Fetching loan history...');
     return this.http.get<any[]>(`${this.api}/loan-history`);
   }
-  getStats(){
-  return this.http.get<any>(`${this.api}/stats`);
-}
 
+  // ✅ Get statistics
+  getStats(): Observable<any> {
+    console.log('Fetching officer stats...');
+    return this.http.get<any>(`${this.api}/stats`);
+  }
 }

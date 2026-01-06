@@ -1,63 +1,92 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { OfficerService } from '../services/officer.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-officer-reports',
-  standalone:true,
-  imports:[CommonModule,FormsModule],
-  templateUrl:'./officer-reports.html',
-  styleUrls:['./officer-reports.css']
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './officer-reports.html',
+  styleUrls: ['./officer-reports.css']
 })
 export class OfficerReportsComponent implements OnInit {
 
-  allLoans:any[] = [];
-  loans:any[] = [];
+  // ✅ SIGNALS
+  allLoans = signal<any[]>([]);
+  loans = signal<any[]>([]);
+  
+  page = signal(1);
+  pageSize = signal(5);
+  
+  searchText = signal('');
+  statusFilter = signal('');
+  loading = signal(false);
 
-  page = 1;
-  pageSize = 5;
-  totalPages = 1;
+  private service = inject(OfficerService);
 
-  searchText = '';
-  statusFilter = '';
+  // ✅ Computed for pagination
+  totalPages = computed(() => 
+    Math.ceil(this.loans().length / this.pageSize())
+  );
 
-  constructor(private service: OfficerService) {}
+  pagedLoans = computed(() => {
+    const start = (this.page() - 1) * this.pageSize();
+    return this.loans().slice(start, start + this.pageSize());
+  });
 
-  ngOnInit(){
+  ngOnInit() {
     this.load();
   }
 
-  load(){
-    this.service.getLoanHistory().subscribe(res=>{
-      this.allLoans = res;
-      this.applyFilter();
+  load() {
+    this.loading.set(true);
+    this.service.getLoanHistory().subscribe({
+      next: (res) => {
+        this.allLoans.set(res);
+        this.applyFilter();
+        this.loading.set(false);
+      },
+      error: (err) => {
+        console.error('Error loading history:', err);
+        this.loading.set(false);
+      }
     });
   }
 
-  applyFilter(){
-    this.loans = this.allLoans.filter(l=>{
-      const matchName = !this.searchText || (l.customerName||'').toLowerCase().includes(this.searchText.toLowerCase());
-      const matchStatus = !this.statusFilter || l.status === this.statusFilter;
+  applyFilter() {
+    const search = this.searchText().toLowerCase();
+    const status = this.statusFilter();
+
+    const filtered = this.allLoans().filter(l => {
+      const matchName = !search || (l.customerName || '').toLowerCase().includes(search);
+      const matchStatus = !status || l.status === status;
       return matchName && matchStatus;
     });
 
-    this.totalPages = Math.ceil(this.loans.length / this.pageSize);
-    this.changePage(1);
+    this.loans.set(filtered);
+    this.page.set(1);
   }
 
-  clearFilter(){
-    this.searchText='';
-    this.statusFilter='';
+  clearFilter() {
+    this.searchText.set('');
+    this.statusFilter.set('');
     this.applyFilter();
   }
 
-  get pagedLoans(){
-    const start = (this.page-1)*this.pageSize;
-    return this.loans.slice(start,start+this.pageSize);
+  changePage(p: number) {
+    this.page.set(p);
   }
 
-  changePage(p:number){ this.page=p; }
-  nextPage(){ if(this.page<this.totalPages) this.page++; }
-  prevPage(){ if(this.page>1) this.page--; }
+  nextPage() {
+    if (this.page() < this.totalPages()) {
+      this.page.update(p => p + 1);
+    }
+  }
+
+  prevPage() {
+    if (this.page() > 1) {
+      this.page.update(p => p - 1);
+    }
+  }
 }

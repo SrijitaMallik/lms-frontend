@@ -1,12 +1,22 @@
 <h2>Loan History</h2>
 
-<div class="history-filters">
+<!-- ✅ Loading State -->
+<div *ngIf="loading()" class="loading-container">
+  <p>Loading history...</p>
+</div>
 
-  <input type="text" placeholder="Search customer..."
-         [(ngModel)]="searchText"
-         (input)="applyFilter()">
+<!-- ✅ Filters -->
+<div *ngIf="!loading()" class="history-filters">
 
-  <select [(ngModel)]="statusFilter" (change)="applyFilter()">
+  <input 
+    type="text" 
+    placeholder="Search customer..."
+    [(ngModel)]="searchText"
+    (input)="applyFilter()">
+
+  <select 
+    [(ngModel)]="statusFilter" 
+    (change)="applyFilter()">
     <option value="">All Status</option>
     <option>Approved</option>
     <option>Rejected</option>
@@ -16,42 +26,52 @@
 
 </div>
 
+<!-- ✅ Data Table -->
+<div *ngIf="!loading()" class="table-wrapper">
+  <table *ngIf="pagedLoans().length > 0">
+    <thead>
+      <tr>
+        <th>Customer</th>
+        <th>Loan</th>
+        <th>Amount</th>
+        <th>Tenure</th>
+        <th>Status</th>
+        <th>Approved On</th>
+      </tr>
+    </thead>
 
-<div class="table-wrapper">
-<table>
-  <thead>
-    <tr>
-      <th>Customer</th>
-      <th>Loan</th>
-      <th>Amount</th>
-      <th>Tenure</th>
-      <th>Status</th>
-      <th>Approved On</th>
-    </tr>
-  </thead>
+    <tbody>
+      <tr *ngFor="let h of pagedLoans()">
+        <td>{{h.customerName}}</td>
+        <td>{{h.loanType?.loanTypeName || h.loanType}}</td>
+        <td>₹{{h.amount || h.loanAmount | number}}</td>
+        <td>{{h.tenure || h.tenureMonths}} months</td>
+        <td>
+          <span class="pill"
+                [ngClass]="h.status=='Approved' ? 'green' : 'red'">
+                {{h.status}}
+          </span>
+        </td>
+        <td>{{h.approvedOn || h.verifiedOn | date:'dd MMM yyyy, hh:mm a'}}</td>
+      </tr>
+    </tbody>
 
-  <tbody>
-  <tr *ngFor="let h of pagedLoans">
-    <td>{{h.customerName}}</td>
-    <td>{{h.loanType?.loanTypeName || h.loanType}}</td>
-    <td>₹{{h.amount || h.loanAmount | number}}</td>
-    <td>{{h.tenure || h.tenureMonths}} months</td>
-    <td>
-      <span class="pill"
-            [ngClass]="h.status=='Approved' ? 'green' : 'red'">
-            {{h.status}}
-      </span>
-    </td>
-    <td>{{h.approvedOn || h.verifiedOn | date:'dd MMM yyyy, hh:mm a'}}</td>
-  </tr>
-</tbody>
+  </table>
 
-</table>
-<div class="pagination-bar">
+  <!-- ✅ Empty State -->
+  <div *ngIf="pagedLoans().length === 0" class="empty-container">
+    <p>No loan history found</p>
+  </div>
+</div>
+
+<!-- ✅ Pagination -->
+<div *ngIf="!loading() && loans().length > 0" class="pagination-bar">
 
   <div class="page-info">
     Items per page:
-    <select [(ngModel)]="pageSize" (change)="applyFilter()">
+    <select 
+      [(ngModel)]="pageSize" 
+      (change)="changePage(1)">
       <option [value]="5">5</option>
       <option [value]="10">10</option>
       <option [value]="20">20</option>
@@ -59,12 +79,9 @@
   </div>
 
   <div class="page-controls">
-    <button (click)="prevPage()" [disabled]="page==1">⟨</button>
-    <span>{{page}} / {{totalPages}}</span>
-    <button (click)="nextPage()" [disabled]="page==totalPages">⟩</button>
+    <button (click)="prevPage()" [disabled]="page()==1">⟨</button>
+    <span>{{page()}} / {{totalPages()}}</span>
+    <button (click)="nextPage()" [disabled]="page()==totalPages()">⟩</button>
   </div>
-
-</div>
-
 
 </div>
