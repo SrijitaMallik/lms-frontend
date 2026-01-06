@@ -14,7 +14,7 @@ import { OfficerApplicationsComponent } from './officer-applications/officer-app
 import { OfficerLayoutComponent } from './officer-layout/officer-layout';
 import { OfficerReportsComponent } from './officer-reports/officer-reports';
 import {AllLoansComponent} from'./admin/all-loans/all-loans';
-import {CustomersComponent} from'./admin/customer/customer';
+//import {CustomersComponent} from'./admin/customer/customer';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -31,7 +31,7 @@ export const routes: Routes = [
   //{path:'reports',component:AdminReportsComponent},
   {path:'loan-types',component:LoanTypes},
   {path:'all-loans',component:AllLoansComponent},
-{path:'customers',component:CustomersComponent},
+//{path:'customers',component:CustomersComponent},
 {path:'notifications',component:NotificationsComponent}
  ]
 },

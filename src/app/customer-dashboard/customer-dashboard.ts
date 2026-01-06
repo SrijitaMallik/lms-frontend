@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { CustomerDashboardService } from '../services/customer-dashboard';
 import { AuthService } from '../services/auth';
+import { NotificationService } from '../services/notifications';
 
 @Component({
   selector: 'app-customer-dashboard',
@@ -28,15 +29,46 @@ export class CustomerDashboardComponent implements OnInit {
   showReceiptModal=false;
   selectedReceipt:any=null;
 
-  // 🔹 popup vars
   showPaymentModal=false;
   selectedEmi:any=null;
 
-  constructor(private service:CustomerDashboardService, private auth:AuthService, public router:Router, private cdr:ChangeDetectorRef){}
+  // 🔔 NOTIFICATION
+  notifications:any[]=[];
+  unreadCount=0;
+  showNotif=false;
+
+  constructor(
+    private service:CustomerDashboardService,
+    private auth:AuthService,
+    public router:Router,
+    private cdr:ChangeDetectorRef,
+    private notify:NotificationService
+  ){}
 
   ngOnInit(){
     this.loadDashboard();
+    this.loadNotif();
   }
+
+  loadNotif(){
+    this.notify.getMyNotifications().subscribe(res=>{
+      this.notifications=res;
+      this.unreadCount = res.filter(x=>!x.isRead).length;
+    });
+  }
+
+  toggleNotif(){ this.showNotif=!this.showNotif; }
+
+  openNotif(n:any){
+    if(!n.isRead){
+      this.notify.markRead(n.notificationId).subscribe(()=>{
+        n.isRead=true;
+        this.unreadCount--;
+      });
+    }
+  }
+
+  // ---------------- DASHBOARD ----------------
 
   loadDashboard(){
 
@@ -73,16 +105,14 @@ export class CustomerDashboardComponent implements OnInit {
     });
   }
 
-  // ---------------- PAYMENT FLOW ----------------
+  // ---------------- PAYMENT ----------------
 
   openPaymentModal(emi:any){
     this.selectedEmi=emi;
     this.showPaymentModal=true;
   }
 
-  closePaymentModal(){
-    this.showPaymentModal=false;
-  }
+  closePaymentModal(){ this.showPaymentModal=false; }
 
   confirmPayment(){
     this.pay(this.selectedEmi.loanApplicationId);
@@ -96,6 +126,7 @@ export class CustomerDashboardComponent implements OnInit {
         this.notification={type:'success',message:'EMI paid successfully ✓'};
         this.payingId=null;
         this.loadDashboard();
+        this.loadNotif();          // 🔔 refresh bell
         this.autoHide();
       },
       error:()=>{
@@ -123,17 +154,16 @@ export class CustomerDashboardComponent implements OnInit {
     document.body.style.overflow='auto';
   }
 
-  downloadReceipt(){
-    alert("Receipt downloaded successfully!");
-  }
+  downloadReceipt(){ alert("Receipt downloaded successfully!"); }
 
   scrollToReceipts(){
     document.querySelector('.transactions-section')?.scrollIntoView({behavior:'smooth'});
   }
-closeNotification(){
-  this.notification = null;
-  this.cdr.detectChanges();
-}
+
+  closeNotification(){
+    this.notification=null;
+    this.cdr.detectChanges();
+  }
 
   logout(){
     this.auth.logout();
