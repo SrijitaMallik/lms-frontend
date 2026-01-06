@@ -21,4 +21,12 @@ export class AdminService{
  getLoanTypes(){ return this.http.get<any[]>(`${this.api}/loan-types`); }
  getLoanType(id:number){ return this.http.get<any>(`${this.api}/loan-types/${id}`); }
  updateLoanType(id:number,body:any){ return this.http.put(`${this.api}/loan-types/${id}`,body); }
+ disableLoanType(id:number){
+  return this.http.delete(`${this.api}/loan-types/${id}`);
+}
+addLoanType(body:any){
+  return this.http.post(`${this.api}/loan-types`, body);
+}
+
+
 }

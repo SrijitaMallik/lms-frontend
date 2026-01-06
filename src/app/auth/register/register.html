@@ -1,33 +1,38 @@
-<div class="page">
-  <div class="card">
+<div class="auth-wrapper">
+  <div class="auth-card">
 
-    <div class="left">
-      <h2>REGISTER</h2>
-      <p>Create your LMS account</p>
+    <h2>REGISTER</h2>
+    <p>Create your LMS account</p>
 
-      <input placeholder="Full Name">
-      <input placeholder="Email">
-      <input placeholder="Password" type="password">
+    <form (ngSubmit)="register()" #f="ngForm" novalidate>
 
-      <select>
+      <input type="text" placeholder="Full Name"
+             name="name"
+             [(ngModel)]="name" required>
+
+      <input type="email" placeholder="Email"
+             name="email"
+             [(ngModel)]="email" required>
+
+      <input type="password" placeholder="Password"
+             name="password"
+             [(ngModel)]="password" required>
+
+      <select name="role" [(ngModel)]="role" required>
         <option value="">Select Role</option>
-        <option>Customer</option>
-        <option>LoanOfficer</option>
-        <option>Admin</option>
+        <option value="Customer">Customer</option>
+        <option value="LoanOfficer">Loan Officer</option>
+        <option value="LoanOfficer">Admin</option>
       </select>
 
-      <button class="btn-primary" type="submit">
-  Register Now
-</button>
+      <button type="submit">Register Now</button>
 
-      <p>
-  Already have an account?
-  <span routerLink="/login" style="cursor:pointer; color:#6C63FF">
-    Login
-  </span>
-</p>
+    </form>
 
-    </div>
+    <p class="login-text">
+      Already have an account?
+      <span (click)="goLogin()">Login</span>
+    </p>
 
   </div>
 </div>

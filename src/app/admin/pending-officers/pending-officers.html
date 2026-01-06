@@ -1,39 +1,30 @@
+<div class="page-title">Pending Loan Officers</div>
+
 <div class="table-card">
-  <h2>Pending Loan Officers</h2>
+<table class="styled-table">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Officer Name</th>
+      <th>Email</th>
+      <th>Status</th>
+      <th>Action</th>
+    </tr>
+  </thead>
 
-  <!-- ✅ ADD LOADING STATE -->
-  <div *ngIf="loading" style="padding: 20px; text-align: center;">
-    Loading officers...
-  </div>
-
-  <!-- ✅ ONLY SHOW TABLE WHEN NOT LOADING -->
-  <table *ngIf="!loading">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Officer Name</th>
-        <th>Email</th>
-        <th>Status</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-
-    <tbody>
-      <tr *ngFor="let o of officers; index as i">
-        <td>{{ i + 1 }}</td>
-        <td>{{ o.fullName }}</td>
-        <td>{{ o.email }}</td>
-        <td><span class="pending">Pending</span></td>
-
-        <td>
-          <button class="approve" (click)="approve(o.userId)">Approve</button>
-          <button class="reject" (click)="reject(o.userId)">Reject</button>
-        </td>
-      </tr>
-
-      <tr *ngIf="officers.length === 0">
-        <td colspan="5" class="empty">No pending officers</td>
-      </tr>
-    </tbody>
-  </table>
+  <tbody>
+    <tr *ngFor="let o of officers; let i = index">
+      <td>{{i+1}}</td>
+      <td>{{o.fullName}}</td>
+      <td>{{o.email}}</td>
+      <td>
+        <span class="badge pending">Pending</span>
+      </td>
+      <td class="actions">
+        <button class="btn approve" (click)="approve(o.userId)">Approve</button>
+        <button class="btn reject" (click)="reject(o.userId)">Reject</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
 </div>

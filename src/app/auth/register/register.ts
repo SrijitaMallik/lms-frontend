@@ -21,17 +21,22 @@ export class Register {
   constructor(private auth: AuthService, private router: Router) {}
 
   register() {
-    this.auth.register({
-      fullName: this.name,
-      email: this.email,
-      password: this.password,
-      role: this.role
-    }).subscribe(() => {
-      alert('Registered successfully');
-      this.router.navigate(['/']);
-    });
-  }
-  
+  this.auth.register({
+    fullName: this.name,
+    email: this.email,
+    password: this.password,
+    role: this.role
+  }).subscribe({
+    next: (res:any) => {
+      alert(res);                    // 👈 shows Pending Admin Approval
+      this.router.navigate(['/login']);
+    },
+    error: err => {
+      alert(err.error);
+    }
+  });
+}
+
   goLogin() {
     this.router.navigate(['/']);
   }

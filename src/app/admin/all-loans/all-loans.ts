@@ -10,15 +10,28 @@ import { AdminService } from '../../services/admin';
  styleUrls:['./all-loans.css']
 })
 export class AllLoansComponent implements OnInit{
-
- loans:any[]=[];
+ loans:any[] = [];
 
  constructor(private admin:AdminService){}
 
- ngOnInit(){ this.load(); }
+ ngOnInit(){
+  this.admin.getVerifiedLoans().subscribe(res=>{
+    this.loans = res;
+    console.log("Verified Loans:",res);
+  });
+ }
 
- load(){ this.admin.getVerifiedLoans().subscribe(res=>this.loans=res); }
+ approve(id:number){
+  this.admin.approveLoan(id).subscribe(()=>{
+    alert("Loan Approved");
+    this.ngOnInit();
+  });
+ }
 
- approve(id:number){ this.admin.approveLoan(id).subscribe(()=>this.load()); }
- reject(id:number){ this.admin.rejectLoan(id).subscribe(()=>this.load()); }
+ reject(id:number){
+  this.admin.rejectLoan(id).subscribe(()=>{
+    alert("Loan Rejected");
+    this.ngOnInit();
+  });
+ }
 }

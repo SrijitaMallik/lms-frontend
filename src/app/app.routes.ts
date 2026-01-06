@@ -5,7 +5,7 @@ import { Register } from './auth/register/register';
 import { Dashboard } from './admin/dashboard/dashboard';
 import { PendingOfficers } from './admin/pending-officers/pending-officers';
 import { AdminLayout } from './admin/layout/admin-layout/admin-layout'
-//import { LoanTypes } from './admin/loan-types/loan-types';
+import { LoanTypes } from './admin/loan-types/loan-types';
 import { CustomerDashboardComponent } from './customer-dashboard/customer-dashboard';
 import { ApplyLoanComponent } from './customer-dashboard/apply-loan/apply-loan';
 import { MyLoansComponent } from './customer-dashboard/my-loans/my-loans';
@@ -29,10 +29,10 @@ export const routes: Routes = [
   {path:'officers',component:PendingOfficers},
   {path:'loans',component:ApplyLoanComponent},
   //{path:'reports',component:AdminReportsComponent},
-  //{path:'loan-types',component:LoanTypes},
-  {path:'admin/all-loans',component:AllLoansComponent},
-{path:'admin/customers',component:CustomersComponent},
-{path:'admin/notifications',component:NotificationsComponent}
+  {path:'loan-types',component:LoanTypes},
+  {path:'all-loans',component:AllLoansComponent},
+{path:'customers',component:CustomersComponent},
+{path:'notifications',component:NotificationsComponent}
  ]
 },
   { path: 'customer-dashboard', component: CustomerDashboardComponent },

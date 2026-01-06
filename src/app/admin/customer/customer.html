@@ -1,21 +1,41 @@
-<h2>Customers</h2>
+<div class="page-title">Customers Summary</div>
 
-<table>
-  <tr>
-    <th>Customer ID</th>
-    <th>Total Loans</th>
-    <th>Active</th>
-    <th>Closed</th>
-    <th>Rejected</th>
-    <th>Total Amount</th>
-  </tr>
+<div class="table-controls">
+  <input class="search"
+         placeholder="Search Customer ID..."
+         [(ngModel)]="search"
+         (input)="applyFilter()">
+</div>
 
-  <tr *ngFor="let c of customers">
-    <td>{{c.customerId}}</td>
-    <td>{{c.totalLoans}}</td>
-    <td>{{c.activeLoans}}</td>
-    <td>{{c.closedLoans}}</td>
-    <td>{{c.rejectedLoans}}</td>
-    <td>₹{{c.totalAmount | number}}</td>
-  </tr>
+<div class="table-card">
+<table class="styled-table">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Total Loans</th>
+      <th>Active</th>
+      <th>Closed</th>
+      <th>Rejected</th>
+      <th>Total Amount</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr *ngFor="let c of paged">
+      <td>{{c.customerId}}</td>
+      <td>{{c.totalLoans}}</td>
+      <td class="green">{{c.activeLoans}}</td>
+      <td class="blue">{{c.closedLoans}}</td>
+      <td class="red">{{c.rejectedLoans}}</td>
+      <td class="amount">₹ {{c.totalAmount | number}}</td>
+    </tr>
+  </tbody>
 </table>
+</div>
+
+<div class="pagination">
+  <button (click)="page=page-1" [disabled]="page==1">Prev</button>
+  <span>Page {{page}} / {{ totalPages }}</span>
+  <button (click)="page=page+1" [disabled]="page==totalPages">Next</button>
+</div>
+
