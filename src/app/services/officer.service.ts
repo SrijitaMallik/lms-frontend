@@ -15,29 +15,30 @@ export class OfficerService {
     return this.http.get<any[]>(`${this.api}/pending`);
   }
 
-  // ✅ Approve/Verify loan - PUT request
-  approveLoan(id: number): Observable<any> {
-    console.log('Approving loan:', id);
-    return this.http.put(
-      `${this.api}/verify/${id}`,
-      {},
-      {
-        headers: { 'Content-Type': 'application/json' }
-      }
-    );
-  }
+  // ✅ APPROVE loan - POST request (changed from PUT)
+ // ✅ APPROVE loan - PUT request
+approveLoan(id: number): Observable<any> {
+  console.log('Approving loan:', id);
+  return this.http.put(
+    `${this.api}/verify/${id}`,
+    { IsApproved: true, Remarks: 'Approved by officer' },  // ✅ SAHI FORMAT
+    {
+      headers: { 'Content-Type': 'application/json' }
+    }
+  );
+}
 
-  // ✅ Reject loan - PUT request (same endpoint with reject status in body)
-  rejectLoan(id: number): Observable<any> {
-    console.log('Rejecting loan:', id);
-    return this.http.put(
-      `${this.api}/verify/${id}`,
-      { status: 'rejected' },
-      {
-        headers: { 'Content-Type': 'application/json' }
-      }
-    );
-  }
+// ✅ REJECT loan - PUT request
+rejectLoan(id: number): Observable<any> {
+  console.log('Rejecting loan:', id);
+  return this.http.put(
+    `${this.api}/verify/${id}`,
+    { IsApproved: false, Remarks: 'Rejected by officer' },  // ✅ SAHI FORMAT
+    {
+      headers: { 'Content-Type': 'application/json' }
+    }
+  );
+}
 
   // ✅ Get loan history
   getLoanHistory(): Observable<any[]> {
